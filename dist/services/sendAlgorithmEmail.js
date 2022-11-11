@@ -10,41 +10,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendAlgorithmEmailService = void 0;
-const fs = require("fs");
-const path = require("path");
 const sgMail = require("@sendgrid/mail");
-function getTemplateNames() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const dir = path.join(__dirname, '../../scraper/data-html');
-        const files = yield fs.readdirSync(dir);
-        const r = /\d{1,2}/;
-        files.sort((f1, f2) => {
-            var match1 = r.exec(f1);
-            var num1 = match1[0];
-            var match2 = r.exec(f2);
-            var num2 = match2[0];
-            //now you have the two numbers in num1 and num2
-            return parseInt(num1, 10) - parseInt(num2, 10);
-        });
-        const fileNamesDic = {};
-        let i = 1;
-        for (const file of files) {
-            fileNamesDic[i] = file;
-            i++;
-        }
-        return fileNamesDic;
-    });
-}
+const getAlgorithmTemplate_1 = require("./getAlgorithmTemplate");
+const contacts_updateCurrentAlg_1 = require("./contacts_updateCurrentAlg");
 function sendAlgorithmEmailService(contacts) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-            const algorithmEmailTemplateID = "d-a6a27a4ec7ba46a5953648a9095a42de";
-            console.log(yield getTemplateNames());
             // Setup the recipient list
-            let listOfRecipients = [];
+            let recipients = [];
             for (let i = 0; i < contacts.length; i++) {
-                const html = yield fs.promises.readFile('./scraper/data-html/1-two-sum.html', "utf8");
+                const currentAlgTemplate = yield (0, getAlgorithmTemplate_1.getAlgorithmTemplateService)(contacts[i].currentAlg);
                 const recipient = {
                     to: [
                         {
@@ -53,22 +28,23 @@ function sendAlgorithmEmailService(contacts) {
                     ],
                     dynamic_template_data: {
                         subject: "Your Daily 75 Algorithm",
-                        algorithm: html
+                        algorithm: currentAlgTemplate
                     },
                 };
-                listOfRecipients.push(recipient);
+                recipients.push(recipient);
             }
-            const messageThrice = {
-                personalizations: listOfRecipients,
+            // Setup the algorithm emails
+            const emailData = {
+                personalizations: recipients,
                 from: {
-                    email: process.env.EMAIL_FROM_ADDRESS,
-                    name: process.env.EMAIL_FROM_NAME,
+                    email: process.env.SG_EMAIL_FROM_ADDRESS,
+                    name: process.env.SG_EMAIL_FROM_NAME,
                 },
                 reply_to: {
-                    email: process.env.EMAIL_FROM_ADDRESS,
-                    name: process.env.EMAIL_FROM_NAME,
+                    email: process.env.SG_EMAIL_FROM_ADDRESS,
+                    name: process.env.SG_EMAIL_FROM_NAME,
                 },
-                templateId: algorithmEmailTemplateID,
+                templateId: process.env.SG_ALGORITHM_EMAIL_TEMPLATE_ID,
                 asm: {
                     groupId: 151505,
                     groups_to_display: [
@@ -76,20 +52,26 @@ function sendAlgorithmEmailService(contacts) {
                     ],
                 }
             };
-            // const sentMailRepsonse = await sgMail.sendMultiple(messageThrice);
-            // if (sentMailRepsonse[0].statusCode === 202) {
-            //   return {
-            //     success: true,
-            //     status: 202,
-            //     message: "All Algorithm Emails Sent Successfully",
-            //   };
-            // } else {
-            //   return {
-            //     success: false,
-            //     status: sentMailRepsonse[0].statusCode,
-            //     message: sentMailRepsonse[0].body.toString(),
-            //   };
-            // }
+            // Send the algorithm Emails
+            const sentMailRepsonse = yield sgMail.sendMultiple(emailData);
+            if (sentMailRepsonse[0].statusCode === 202) {
+                // Update user's current algorithm in mongoDB and sendgrid
+                for (let i = 0; i < contacts.length; i++) {
+                    yield (0, contacts_updateCurrentAlg_1.updateContactCurrentAlgService)(contacts[i].email);
+                }
+                return {
+                    success: true,
+                    status: 202,
+                    message: "All Algorithm Emails Sent Successfully",
+                };
+            }
+            else {
+                return {
+                    success: false,
+                    status: sentMailRepsonse[0].statusCode,
+                    message: sentMailRepsonse[0].body.toString(),
+                };
+            }
         }
         catch (err) {
             console.log(err.response.body);

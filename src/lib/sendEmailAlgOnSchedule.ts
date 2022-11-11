@@ -2,9 +2,11 @@ import * as path from "path";
 import * as dotenv from "dotenv";
 import mongoose from 'mongoose';
 import * as cron from 'node-cron'
+import * as sgMail from '@sendgrid/mail'
+import * as client from '@sendgrid/client'
 
-import { IUser, userSchema } from '../models/user.model'
 import { sendAlgorithmEmailService } from "../services/sendAlgorithmEmail";
+import { getContactsService } from "../services/contacts_getAll";
 
 dotenv.config({ path: path.join(__dirname, "../../.env") });
 
@@ -22,13 +24,12 @@ dotenv.config({ path: path.join(__dirname, "../../.env") });
 run().catch(err => console.log)
 
 async function run() {
-
-
   await mongoose.connect(process.env.MONGO_URL);
 
-  const User = await mongoose.model('User', userSchema)
-  
-  const contacts: Array<IUser> = await User.find({}, 'email name joinedDate tier subscribed currentAlg timezone')
-    
+  sgMail.setApiKey(process.env.SG_API_KEY);
+  client.setApiKey(process.env.SG_API_KEY);
+
+  const contacts = await getContactsService()
+
   await sendAlgorithmEmailService(contacts)
 }

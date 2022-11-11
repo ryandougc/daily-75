@@ -12,8 +12,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
 const dotenv = require("dotenv");
 const mongoose_1 = require("mongoose");
-const user_model_1 = require("../models/user.model");
+const sgMail = require("@sendgrid/mail");
+const client = require("@sendgrid/client");
 const sendAlgorithmEmail_1 = require("../services/sendAlgorithmEmail");
+const contacts_getAll_1 = require("../services/contacts_getAll");
 dotenv.config({ path: path.join(__dirname, "../../.env") });
 // cron.schedule(
 //     "0 7 * * 1,2,3,4,5", // Run at 7am each week day
@@ -29,8 +31,9 @@ run().catch(err => console.log);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         yield mongoose_1.default.connect(process.env.MONGO_URL);
-        const User = yield mongoose_1.default.model('User', user_model_1.userSchema);
-        const contacts = yield User.find({}, 'email name joinedDate tier subscribed currentAlg timezone');
+        sgMail.setApiKey(process.env.SG_API_KEY);
+        client.setApiKey(process.env.SG_API_KEY);
+        const contacts = yield (0, contacts_getAll_1.getContactsService)();
         yield (0, sendAlgorithmEmail_1.sendAlgorithmEmailService)(contacts);
     });
 }

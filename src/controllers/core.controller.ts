@@ -1,13 +1,12 @@
 import mongoose from 'mongoose';
 import { generateToken, generateHMAC } from '../lib/utils';
-import { IUser, userSchema } from '../models/user.model'
+import { IUser, User } from '../models/user.model'
 import { subConfSchema } from '../models/subConf.model'
 import { sendSubscriptionConfirmationEmailService } from '../services/sendSubscriptionConfirmationEmail';
-import { getContactsService } from '../services/getContacts';
+import { getContactsService } from '../services/contacts_getAll';
 import { sendAlgorithmEmailService } from '../services/sendAlgorithmEmail';
-import { addContactToSendGridService } from '../services/addContactToSendGrid';
+import { addContactToSendGridService } from '../services/contacts_addToSG';
 
-const User = mongoose.model('User', userSchema)
 const SubConf = mongoose.model('SubConf', subConfSchema)
 
 export const getLandingPage = async (req, res, next) => {

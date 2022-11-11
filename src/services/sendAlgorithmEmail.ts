@@ -1,17 +1,14 @@
-import * as sgMail            from "@sendgrid/mail";
+import * as sgMail from "@sendgrid/mail";
 
 import { DataMessage }        from "../lib/interface";
 import { IUser }              from "../models/user.model";
 import { getAlgorithmTemplateService } from './getAlgorithmTemplate';
-import { updateContactCurrentAlgService } from "./updateContactCurrentAlg";
+import { updateContactCurrentAlgService } from "./contacts_updateCurrentAlg";
 
 export async function sendAlgorithmEmailService(contacts: Array<IUser>): Promise<DataMessage> {
   try {
-    sgMail.setApiKey(process.env.SG_API_KEY);
-
     // Setup the recipient list
     let recipients = []
-
     for(let i = 0; i < contacts.length; i++) {
       const currentAlgTemplate = await getAlgorithmTemplateService(contacts[i].currentAlg)
 

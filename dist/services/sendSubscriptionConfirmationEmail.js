@@ -14,7 +14,6 @@ const sgMail = require("@sendgrid/mail");
 function sendSubscriptionConfirmationEmailService(user, subscriptionConfirmationLink) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const confirmSubscriptionTemplateID = "d-0a18e0af3dc642658c7c2c1fbf2a1704";
             const emailContent = {
                 from: {
                     email: process.env.EMAIL_FROM_ADDRESS,
@@ -28,7 +27,7 @@ function sendSubscriptionConfirmationEmailService(user, subscriptionConfirmation
                     email: user.email,
                     name: user.name,
                 },
-                templateId: confirmSubscriptionTemplateID,
+                templateId: process.env.SG_CONFIRM_SUBSCRIPTION_EMAIL_TEMPLATE_ID,
                 dynamicTemplateData: {
                     subject: "Confirm your Daily 75 Subscription",
                     name: user.name,

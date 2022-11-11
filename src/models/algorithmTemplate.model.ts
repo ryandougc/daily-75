@@ -2,15 +2,15 @@ import * as path from 'path'
 import * as fs from 'fs'
 
 export class AlgorithmTemplate {
-    templateFiles: string[] 
-    templateFileNames: object
+    templateFileNames: Array<string>
+    templateFileDictionary: object
 
     constructor() {
-        this.templateFiles = this.getTemplateFiles()
-        this.templateFileNames = this.getTemplateNames()
+        this.templateFileNames = this.getTemplateFileNames()
+        this.templateFileDictionary = this.createTemplateFileDictionary()
     }
 
-    private getTemplateFiles(): string[] {
+    private getTemplateFileNames(): Array<string> {
         const dir = path.join(__dirname, '../../scraper/algorithm-html-files')
     
         const files = fs.readdirSync(dir)
@@ -18,7 +18,7 @@ export class AlgorithmTemplate {
         // Sort files in numbered order
         const r = /\d{1,2}/
 
-        this.templateFiles.sort((f1, f2) => {
+        files.sort((f1, f2) => {
             var match1 = r.exec(f1);
             var num1 = match1[0];
 
@@ -31,11 +31,11 @@ export class AlgorithmTemplate {
         return files
     }
 
-    private getTemplateNames(): object {
+    private createTemplateFileDictionary(): object {
         const fileNamesDicionary = {}
         let i = 1
 
-        for(const file of this.templateFiles) {
+        for(const file of this.templateFileNames) {
             fileNamesDicionary[i] = file
             i++
         }
@@ -44,7 +44,7 @@ export class AlgorithmTemplate {
     }
 
     private getAlgorithmTemplateName(algId: string): string {
-        const foundAlg = this.templateFileNames[algId]
+        const foundAlg = this.templateFileDictionary[algId]
 
         if(foundAlg) return foundAlg
         else return undefined
@@ -55,7 +55,7 @@ export class AlgorithmTemplate {
         
         const algName = this.getAlgorithmTemplateName(algIdStr)
 
-        const html = await fs.promises.readFile(`./scraper/algorithm-html-files/${algName}.html`, "utf8")
+        const html = await fs.promises.readFile(`./scraper/algorithm-html-files/${algName}`, "utf8")
 
         if(html) return html
         else return undefined

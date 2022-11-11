@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import { Schema, model } from "mongoose";
 
 export interface IUser {
   email: string;
@@ -10,7 +10,7 @@ export interface IUser {
   timezone: string;
 }
 
-export const userSchema = new Schema<IUser>({
+const userSchema = new Schema<IUser>({
   email: {
     required: true,
     type: String,
@@ -45,3 +45,5 @@ export const userSchema = new Schema<IUser>({
     default: "America/Vancouver",
   },
 });
+
+export const User = model('User', userSchema)

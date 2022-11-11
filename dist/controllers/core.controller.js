@@ -15,8 +15,7 @@ const utils_1 = require("../lib/utils");
 const user_model_1 = require("../models/user.model");
 const subConf_model_1 = require("../models/subConf.model");
 const sendSubscriptionConfirmationEmail_1 = require("../services/sendSubscriptionConfirmationEmail");
-const addContactToSendGrid_1 = require("../services/addContactToSendGrid");
-const User = mongoose_1.default.model('User', user_model_1.userSchema);
+const contacts_addToSG_1 = require("../services/contacts_addToSG");
 const SubConf = mongoose_1.default.model('SubConf', subConf_model_1.subConfSchema);
 const getLandingPage = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     res.render("index.ejs");
@@ -26,7 +25,7 @@ const subscribe = (req, res, next) => __awaiter(void 0, void 0, void 0, function
     try {
         const userEmail = req.body.email;
         // Check if user is already subscribed, otherwise make a new user
-        let user = yield User.findOne({ email: userEmail });
+        let user = yield user_model_1.User.findOne({ email: userEmail });
         if (user) {
             if (user.subscribed) {
                 return next({
@@ -37,7 +36,7 @@ const subscribe = (req, res, next) => __awaiter(void 0, void 0, void 0, function
             }
         }
         else {
-            user = yield new User({
+            user = yield new user_model_1.User({
                 email: userEmail
             }).save();
         }
@@ -88,11 +87,11 @@ const getSubscriptionConfirmed = (req, res, next) => __awaiter(void 0, void 0, v
             });
         }
         // Update user's subscription status to true
-        yield User.updateOne({ _id: userSubConf.userId }, { subscribed: true });
+        yield user_model_1.User.updateOne({ _id: userSubConf.userId }, { subscribed: true });
         yield userSubConf.deleteOne({ _id: userSubConf._id });
         // Add user to sendgrid contact list
-        const user = yield User.findOne({ _id: userSubConf.userId });
-        yield (0, addContactToSendGrid_1.addContactToSendGridService)(user);
+        const user = yield user_model_1.User.findOne({ _id: userSubConf.userId });
+        yield (0, contacts_addToSG_1.addContactToSendGridService)(user);
         res.status(200).render("subscriptionConfirmedPage.ejs");
     }
     catch (err) {
@@ -110,7 +109,7 @@ const unsubscribe = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
         const userEmail = req.query.email;
         const userIdHash = req.query.securityCode;
         const token = req.query.token; // Research how unsubscribe tokens work
-        yield User.updateOne({ email: userEmail }, { subsribed: false });
+        yield user_model_1.User.updateOne({ email: userEmail }, { subsribed: false });
         // Render unsubscribe successful page
         res.render("unsubscribe.ejs");
     }

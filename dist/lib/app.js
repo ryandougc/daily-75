@@ -29,8 +29,8 @@ class App {
         mongoose_1.default.connect(process.env.MONGO_URL);
     }
     initSendGrid() {
-        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-        client.setApiKey(process.env.SENDGRID_API_KEY);
+        sgMail.setApiKey(process.env.SG_API_KEY);
+        client.setApiKey(process.env.SG_API_KEY);
     }
     mountRoutes() {
         this.express.use("/", core_route_1.router);

@@ -1,9 +1,5 @@
-import mongoose from "mongoose"
-
-import { userSchema, IUser } from "../models/user.model"
-import { addContactToSendGridService } from "./addContactToSendGrid"
-
-const User = mongoose.model('User', userSchema)
+import { IUser, User } from "../models/user.model"
+import { addContactToSendGridService } from "./contacts_addToSG"
 
 export async function updateContactCurrentAlgService(userEmail: string): Promise<boolean> {
     try {
