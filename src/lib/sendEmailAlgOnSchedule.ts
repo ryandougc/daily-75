@@ -10,26 +10,33 @@ import { getContactsService } from "../services/contacts_getAll";
 
 dotenv.config({ path: path.join(__dirname, "../../.env") });
 
-// cron.schedule(
-//     "0 7 * * 1,2,3,4,5", // Run at 7am each week day
-//     async () => {
-//         await sendAlgorithmEmailService()
-//     },
-//     {
-//       scheduled: true,
-//       timezone: "America/Vancouver",
-//     }
-// );
+cron.schedule(
+    "0 7 * * 1,2,3,4,5", // Run at 7am each week day
+    async () => {
+      await mongoose.connect(process.env.MONGO_URL);
 
-run().catch(err => console.log)
+      sgMail.setApiKey(process.env.SG_API_KEY);
+      client.setApiKey(process.env.SG_API_KEY);
+    
+      const contacts = await getContactsService()
+    
+      await sendAlgorithmEmailService(contacts)
+    },
+    {
+      scheduled: true,
+      timezone: "America/Vancouver",
+    }
+);
 
-async function run() {
-  await mongoose.connect(process.env.MONGO_URL);
+// run().catch(err => console.log)
 
-  sgMail.setApiKey(process.env.SG_API_KEY);
-  client.setApiKey(process.env.SG_API_KEY);
+// async function run() {
+//   await mongoose.connect(process.env.MONGO_URL);
 
-  const contacts = await getContactsService()
+//   sgMail.setApiKey(process.env.SG_API_KEY);
+//   client.setApiKey(process.env.SG_API_KEY);
 
-  await sendAlgorithmEmailService(contacts)
-}
+//   const contacts = await getContactsService()
+
+//   await sendAlgorithmEmailService(contacts)
+// }

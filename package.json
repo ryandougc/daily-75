@@ -6,6 +6,7 @@
   "scripts": {
     "prettier": "prettier --write .",
     "compiler": "tsc --watch",
+    "comile": "tsc",
     "compileStyles": "sass --watch ./public/css/index.sass:./public/css/index.css",
     "devStart": "nodemon ./dist/server.js"
   },
